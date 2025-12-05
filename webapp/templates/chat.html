@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Chat - Phishing Detection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 800px;
+            height: 90vh;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h1 {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .shield-icon {
+            font-size: 30px;
+        }
+
+        .username-display {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f5f5f5;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            max-width: 70%;
+            word-wrap: break-word;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.safe {
+            background: #e3f2fd;
+            align-self: flex-start;
+            border-left: 4px solid #2196F3;
+        }
+
+        .message.phishing {
+            background: #ffebee;
+            align-self: flex-start;
+            border-left: 4px solid #f44336;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+
+        .username {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .timestamp {
+            color: #999;
+            font-size: 11px;
+        }
+
+        .message-text {
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .phishing-alert {
+            background: #f44336;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin-top: 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .warning-icon {
+            font-size: 18px;
+        }
+
+        .probability {
+            background: rgba(255,255,255,0.3);
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #ddd;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .send-button:hover {
+            transform: scale(1.05);
+        }
+
+        .send-button:active {
+            transform: scale(0.95);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .control-button {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 8px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+
+        .control-button:hover {
+            background: #e0e0e0;
+        }
+
+        .stats {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            text-align: center;
+            border-left: 4px solid #ffc107;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+
+        /* Scrollbar styling */
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>
+                <span class="shield-icon">🛡️</span>
+                Secure Chat
+            </h1>
+            <div class="username-display" id="usernameDisplay">{{ username }}</div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="loading">Loading messages...</div>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="input-wrapper">
+                <input 
+                    type="text" 
+                    class="chat-input" 
+                    id="messageInput" 
+                    placeholder="Type your message..."
+                    onkeypress="handleKeyPress(event)"
+                >
+                <button class="send-button" onclick="sendMessage()">Send</button>
+            </div>
+            <div class="controls">
+                <button class="control-button" onclick="changeUsername()">👤 Change Username</button>
+                <button class="control-button" onclick="refreshMessages()">🔄 Refresh</button>
+                <button class="control-button" onclick="clearChat()">🗑️ Clear Chat</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUsername = "{{ username }}";
+        let lastMessageCount = 0;
+
+        // Load messages when page loads
+        window.onload = function() {
+            loadMessages();
+            // Auto-refresh every 5 seconds (increased from 3)
+            setInterval(loadMessages, 5000);
+        };
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            try {
+                const response = await fetch('/send_message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    input.value = '';
+                    loadMessages();
+
+                    // Log confidence to console
+                    console.log(`Message sent - Phishing probability: ${(data.probability * 100).toFixed(1)}%`);
+
+                    // Show alert only if phishing detected with >80% confidence
+                    if (data.is_phishing) {
+                        alert(`⚠️ WARNING: This message has been flagged as potentially phishing!\n\nConfidence: ${(data.probability * 100).toFixed(1)}%\n\nPlease review suspicious links or requests for sensitive information.`);
+                    }
+                } else {
+                    alert('Error sending message: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to send message');
+            }
+        }
+
+        async function loadMessages() {
+            try {
+                const response = await fetch('/get_messages');
+                const data = await response.json();
+
+                // Only update if new messages
+                if (data.messages.length === lastMessageCount) {
+                    return;
+                }
+                lastMessageCount = data.messages.length;
+
+                const messagesContainer = document.getElementById('chatMessages');
+                const isScrolledToBottom = messagesContainer.scrollHeight - messagesContainer.scrollTop <= messagesContainer.clientHeight + 50;
+                
+                // Calculate stats
+                const totalMessages = data.messages.length;
+                const phishingCount = data.messages.filter(m => m.is_phishing).length;
+                
+                let html = '';
+                
+                if (totalMessages > 0) {
+                    html += `<div class="stats">
+                        📊 Total Messages: ${totalMessages} | 
+                        ⚠️ Phishing Detected: ${phishingCount} 
+                        (${totalMessages > 0 ? ((phishingCount/totalMessages)*100).toFixed(1) : 0}%)
+                    </div>`;
+                }
+
+                data.messages.forEach(msg => {
+                    const messageClass = msg.is_phishing ? 'phishing' : 'safe';
+                    const timestamp = new Date(msg.timestamp).toLocaleTimeString();
+                    const confidencePercent = (msg.probability * 100).toFixed(1);
+                    
+                    html += `
+                        <div class="message ${messageClass}">
+                            <div class="message-header">
+                                <span class="username">${escapeHtml(msg.username)}</span>
+                                <span class="timestamp">${timestamp}</span>
+                            </div>
+                            <div class="message-text">${escapeHtml(msg.message)}</div>
+                            <div style="font-size: 11px; color: #666; margin-top: 5px;">
+                                🛡️ Confidence: ${confidencePercent}%
+                            </div>
+                            ${msg.is_phishing ? `
+                                <div class="phishing-alert">
+                                    <span class="warning-icon">⚠️</span>
+                                    <span>HIGH RISK PHISHING (>${confidencePercent}%)</span>
+                                    <span class="probability">${confidencePercent}%</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+
+                messagesContainer.innerHTML = html;
+                
+                // Auto-scroll only if user was already at bottom
+                if (isScrolledToBottom) {
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+
+        async function changeUsername() {
+            const newUsername = prompt('Enter your new username:', currentUsername);
+            if (newUsername && newUsername.trim()) {
+                try {
+                    const response = await fetch('/set_username', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username: newUsername.trim() })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        currentUsername = data.username;
+                        document.getElementById('usernameDisplay').textContent = currentUsername;
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Failed to change username');
+                }
+            }
+        }
+
+        function refreshMessages() {
+            loadMessages();
+        }
+
+        async function clearChat() {
+            if (!confirm('Are you sure you want to clear all messages?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/clear_chat', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    loadMessages();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to clear chat');
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

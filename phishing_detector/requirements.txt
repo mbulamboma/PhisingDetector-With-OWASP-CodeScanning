@@ -1,0 +1,13 @@
+pandas
+numpy
+scikit-learn
+joblib
+beautifulsoup4
+lxml
+regex
+imbalanced-learn
+# Transformers for advanced model
+transformers[datasets]
+torch
+datasets
+sentencepiece
