@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 import sys
 
+
 # need to import our text processing stuff from the other folder
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'phishing_detector'))
 from utils import clean_text, extract_numeric_features
