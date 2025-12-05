@@ -1,0 +1,54 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Trained models (can be large files)
+*.pkl
+*.joblib
+*.model
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Security reports (contain sensitive information)
+security/security-reports/*.html
+security/security-reports/*.json
+security/security-reports/*.xml
+security/security-reports/*.csv
+security/security-reports/*.sarif
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Log files
+*.log
+hs_err_*.log
+
+# Temporary files
+*.tmp
+*.temp

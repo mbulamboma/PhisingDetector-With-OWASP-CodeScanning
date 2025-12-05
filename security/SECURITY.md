@@ -6,19 +6,19 @@ Run a security scan on the webapp:
 
 **Windows (PowerShell):**
 ```powershell
-cd webapp
+cd security
 .\Run-SecurityScan.ps1
 ```
 
 **Windows (Command Prompt):**
 ```cmd
-cd webapp
+cd security
 run-security-scan.bat
 ```
 
 **Linux/Mac:**
 ```bash
-cd webapp
+cd security
 ./run-security-scan.sh
 ```
 
@@ -27,9 +27,9 @@ cd webapp
 Uses OWASP Dependency Check to scan your Python dependencies for known security vulnerabilities. The tool:
 
 1. Downloads the latest vulnerability database
-2. Scans all packages in `requirements.txt`
+2. Scans all packages in `webapp/requirements.txt`
 3. Checks against CVE (Common Vulnerabilities and Exposures) database
-4. Generates detailed reports in HTML, JSON, and XML formats
+4. Generates detailed reports in `security/security-reports/`
 
 ## Prerequisites
 
@@ -39,7 +39,7 @@ Uses OWASP Dependency Check to scan your Python dependencies for known security 
 
 ## Understanding the Results
 
-The scan generates reports in `webapp/security-reports/`:
+The scan generates reports in `security/security-reports/`:
 
 ### Report Severity Levels
 - **CRITICAL (9.0-10.0)**: Drop everything and fix immediately

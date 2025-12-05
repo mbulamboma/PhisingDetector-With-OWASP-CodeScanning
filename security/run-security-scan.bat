@@ -13,14 +13,16 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-REM Get current directory (webapp folder)
-set WEBAPP_DIR=%cd%
+REM Get webapp directory (one level up from security folder)
+set WEBAPP_DIR=%cd%\..\webapp
+set SECURITY_DIR=%cd%
 
 echo 📁 Scanning directory: %WEBAPP_DIR%
+echo 📁 Reports will be saved to: %SECURITY_DIR%\security-reports
 echo 📅 Scan date: %date% %time%
 
 REM Create reports directory if it doesn't exist
-if not exist "%WEBAPP_DIR%\security-reports" mkdir "%WEBAPP_DIR%\security-reports"
+if not exist "%SECURITY_DIR%\security-reports" mkdir "%SECURITY_DIR%\security-reports"
 
 echo.
 echo 🚀 Running OWASP Dependency Check...
@@ -29,7 +31,7 @@ echo This might take a few minutes on first run (downloading vulnerability datab
 REM Run OWASP Dependency Check with Windows paths
 docker run --rm ^
     --volume "%WEBAPP_DIR%":/src ^
-    --volume "%WEBAPP_DIR%\security-reports":/report ^
+    --volume "%SECURITY_DIR%\security-reports":/report ^
     owasp/dependency-check:latest ^
     --scan /src ^
     --format "ALL" ^
@@ -42,12 +44,12 @@ if %errorlevel% equ 0 (
     echo ✅ Vulnerability scan completed successfully!
     echo.
     echo 📊 Reports generated:
-    echo    - HTML Report: %WEBAPP_DIR%\security-reports\dependency-check-report.html
-    echo    - JSON Report: %WEBAPP_DIR%\security-reports\dependency-check-report.json
-    echo    - XML Report:  %WEBAPP_DIR%\security-reports\dependency-check-report.xml
+    echo    - HTML Report: %SECURITY_DIR%\security-reports\dependency-check-report.html
+    echo    - JSON Report: %SECURITY_DIR%\security-reports\dependency-check-report.json
+    echo    - XML Report:  %SECURITY_DIR%\security-reports\dependency-check-report.xml
     echo.
     echo 💡 Opening HTML report in default browser...
-    start "" "%WEBAPP_DIR%\security-reports\dependency-check-report.html"
+    start "" "%SECURITY_DIR%\security-reports\dependency-check-report.html"
     echo.
 ) else (
     echo.

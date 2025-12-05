@@ -12,15 +12,17 @@ if ! docker info > /dev/null 2>&1; then
     exit 1
 fi
 
-# Get the absolute path to the webapp directory
+# Get the absolute path to the security and webapp directories
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WEBAPP_DIR="$SCRIPT_DIR"
+SECURITY_DIR="$SCRIPT_DIR"
+WEBAPP_DIR="$SCRIPT_DIR/../webapp"
 
 echo "📁 Scanning directory: $WEBAPP_DIR"
+echo "📁 Reports directory: $SECURITY_DIR/security-reports"
 echo "📅 Scan date: $(date)"
 
 # Create reports directory if it doesn't exist
-mkdir -p "$WEBAPP_DIR/security-reports"
+mkdir -p "$SECURITY_DIR/security-reports"
 
 # Run OWASP Dependency Check
 echo ""
@@ -31,7 +33,7 @@ docker run --rm \
     -e user=$USER \
     -u $(id -u ${USER}):$(id -g ${USER}) \
     --volume "$WEBAPP_DIR":/src:z \
-    --volume "$WEBAPP_DIR/security-reports":/report:z \
+    --volume "$SECURITY_DIR/security-reports":/report:z \
     owasp/dependency-check:latest \
     --scan /src \
     --format "ALL" \
@@ -44,21 +46,21 @@ if [ $? -eq 0 ]; then
     echo "✅ Vulnerability scan completed successfully!"
     echo ""
     echo "📊 Reports generated:"
-    echo "   - HTML Report: $WEBAPP_DIR/security-reports/dependency-check-report.html"
-    echo "   - JSON Report: $WEBAPP_DIR/security-reports/dependency-check-report.json"
-    echo "   - XML Report:  $WEBAPP_DIR/security-reports/dependency-check-report.xml"
+    echo "   - HTML Report: $SECURITY_DIR/security-reports/dependency-check-report.html"
+    echo "   - JSON Report: $SECURITY_DIR/security-reports/dependency-check-report.json"
+    echo "   - XML Report:  $SECURITY_DIR/security-reports/dependency-check-report.xml"
     echo ""
     echo "💡 To view the HTML report:"
-    echo "   Open: file://$WEBAPP_DIR/security-reports/dependency-check-report.html"
+    echo "   Open: file://$SECURITY_DIR/security-reports/dependency-check-report.html"
     echo ""
     
     # Try to open the report automatically (works on some systems)
     if command -v xdg-open > /dev/null; then
         echo "🌐 Opening report in default browser..."
-        xdg-open "$WEBAPP_DIR/security-reports/dependency-check-report.html"
+        xdg-open "$SECURITY_DIR/security-reports/dependency-check-report.html"
     elif command -v open > /dev/null; then
         echo "🌐 Opening report in default browser..."
-        open "$WEBAPP_DIR/security-reports/dependency-check-report.html"
+        open "$SECURITY_DIR/security-reports/dependency-check-report.html"
     fi
     
 else

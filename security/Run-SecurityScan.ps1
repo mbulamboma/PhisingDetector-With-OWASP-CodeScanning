@@ -14,11 +14,13 @@ try {
     exit 1
 }
 
-# Get current directory (webapp folder)
-$webappDir = Get-Location
-$reportsDir = Join-Path $webappDir "security-reports"
+# Get current directory (security folder) and webapp directory
+$securityDir = Get-Location
+$webappDir = Join-Path $securityDir "..\webapp" | Resolve-Path
+$reportsDir = Join-Path $securityDir "security-reports"
 
 Write-Host "📁 Scanning directory: $webappDir" -ForegroundColor Yellow
+Write-Host "📁 Reports directory: $reportsDir" -ForegroundColor Yellow
 Write-Host "📅 Scan date: $(Get-Date)" -ForegroundColor Yellow
 
 # Create reports directory if it doesn't exist
