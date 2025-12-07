@@ -1,20 +1,24 @@
-# Security Vulnerability Check with OWASP Dependency Check
-# PowerShell script for Windows
+<#
+Procédure d'analyse de vulnérabilités sécuritaires
+Implémentation OWASP Dependency Check pour l'audit de sécurité de l'application
+Auteur: Mbula Mboma Jean Gilbert (MikaelX)
+Année: 2024-2025
+#>
 
-Write-Host "🔍 Starting OWASP Dependency Check for Phishing Detection Web App" -ForegroundColor Cyan
-Write-Host "==================================================================" -ForegroundColor Cyan
+Write-Host "🔍 Initialisation du processus d'analyse de vulnérabilités..." -ForegroundColor Cyan
+Write-Host "===============================================" -ForegroundColor Cyan
 
-# Check if Docker is running
+# Vérification de disponibilité du service Docker
 try {
     docker info | Out-Null
-    Write-Host "✅ Docker is running" -ForegroundColor Green
+    Write-Host "✅ Service Docker opérationnel" -ForegroundColor Green
 } catch {
-    Write-Host "❌ Docker is not running. Please start Docker Desktop first." -ForegroundColor Red
-    Read-Host "Press Enter to exit"
+    Write-Host "❌ Service Docker non disponible. Veuillez démarrer Docker Desktop." -ForegroundColor Red
+    Read-Host "Appuyez sur Entrée pour terminer"
     exit 1
 }
 
-# Get current directory (security folder) and webapp directory
+# Configuration des répertoires de travail (dossier security et webapp)
 $securityDir = Get-Location
 $webappDir = Join-Path $securityDir "..\webapp" | Resolve-Path
 $reportsDir = Join-Path $securityDir "security-reports"
@@ -81,18 +85,18 @@ try {
 }
 
 Write-Host ""
-Write-Host "🛡️  Security Scan Summary" -ForegroundColor Cyan
-Write-Host "=========================" -ForegroundColor Cyan
-Write-Host "Project: Phishing Detection Web App"
-Write-Host "Scan Type: Dependency vulnerability check"
-Write-Host "Tool: OWASP Dependency Check"
-Write-Host "Status: Complete" -ForegroundColor Green
+Write-Host "🛡️  Rapport d'Exécution de l'Analyse Sécuritaire" -ForegroundColor Cyan
+Write-Host "==========================================" -ForegroundColor Cyan
+Write-Host "Projet : Système de Détection de Phishing"
+Write-Host "Type d'Analyse : Vérification des Dépendances"
+Write-Host "Outil Utilisé : OWASP Dependency Check"
+Write-Host "Statut : Analyse Complétée" -ForegroundColor Green
 Write-Host ""
-Write-Host "Next steps:" -ForegroundColor Yellow
-Write-Host "1. Review the HTML report for any HIGH or CRITICAL vulnerabilities"
-Write-Host "2. Update vulnerable dependencies if found"
-Write-Host "3. Re-run this script after updates to verify fixes"
-Write-Host "4. Consider running this regularly (weekly/monthly)"
+Write-Host "Procédures Post-Analyse :" -ForegroundColor Yellow
+Write-Host "1. Examiner le rapport HTML pour détecter les vulnérabilités critiques"
+Write-Host "2. Procéder aux mises à jour des dépendances si requis"
+Write-Host "3. Re-exécuter le processus d'analyse après modifications"
+Write-Host "4. Implémenter une cadence d'exécution régulière"
 Write-Host ""
 
-Read-Host "Press Enter to exit"
+Read-Host "Appuyez sur Entrée pour terminer"

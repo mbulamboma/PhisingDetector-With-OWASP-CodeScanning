@@ -1,3 +1,10 @@
+"""
+Entraînement du Modèle de Détection de Phishing
+Auteur: Mbula Mboma Jean Gilbert (MikaelX)
+Année: 2024-2025
+Domaine: Machine Learning & Traitement du Langage Naturel
+"""
+
 import argparse
 import pandas as pd
 import numpy as np
@@ -16,28 +23,43 @@ from utils import load_data, clean_text, extract_numeric_features
 
 
 def build_pipeline(use_smote=True, use_ensemble=False):
-    # Word-level analysis - looking at individual words and phrases
+    """
+    Construction du pipeline de machine learning pour la détection de phishing
+    
+    Cette fonction configure l'architecture complète du modèle d'apprentissage
+    automatique, incluant le préprocessing des données textuelles et numériques,
+    ainsi que la configuration des algorithmes de classification.
+    
+    Paramètres:
+        use_smote (bool): Active la technique SMOTE pour l'équilibrage des classes
+        use_ensemble (bool): Utilise un ensemble de classificateurs
+    
+    Retourne:
+        Pipeline: Le pipeline complet configuré pour l'entraînement
+    """
+    # Configuration de l'analyse textuelle au niveau des mots
+    # Extraction des caractéristiques linguistiques (mots individuels et combinaisons)
     text_pipe_word = TfidfVectorizer(
         analyzer='word', 
-        ngram_range=(1, 3),  # single words + 2-3 word combos
+        ngram_range=(1, 3),  # Analyse des mots simples et des trigrammes
         max_features=80000,  
-        min_df=2,  # ignore super rare words
-        max_df=0.95,  # ignore super common words like "the", "and"
+        min_df=2,  # Exclusion des termes extrêmement rares
+        max_df=0.95,  # Exclusion des mots trop fréquents ("le", "de", etc.)
         sublinear_tf=True,  
         strip_accents='unicode',
         lowercase=True
-    )
     
-    # Character-level analysis - helps catch misspelled words and weird patterns
+    # Configuration de l'analyse au niveau des caractères
+    # Détection des patterns d'obfuscation et des erreurs orthographiques
     text_pipe_char = TfidfVectorizer(
         analyzer='char',
-        ngram_range=(3, 5),  # 3-5 character sequences
+        ngram_range=(3, 5),  # Séquences de 3 à 5 caractères
         max_features=20000,
         min_df=2,
         sublinear_tf=True
     )
     
-    # Combine different types of features
+    # Combinaison des différents types de caractéristiques
     ct = ColumnTransformer(transformers=[
         ('text_word', text_pipe_word, 'text'),
         ('text_char', text_pipe_char, 'text'),
@@ -45,7 +67,7 @@ def build_pipeline(use_smote=True, use_ensemble=False):
     ])
     
     if use_ensemble:
-        # Try combining two different models - sometimes works better than just one
+        # Configuration d'un ensemble de classificateurs pour améliorer la robustesse
         if use_smote:
             clf = ImbPipeline([
                 ('features', ct),
@@ -56,7 +78,7 @@ def build_pipeline(use_smote=True, use_ensemble=False):
                         ('rf', RandomForestClassifier(n_estimators=200, max_depth=20, min_samples_split=5, class_weight='balanced', random_state=42, n_jobs=-1))
                     ],
                     voting='soft',
-                    weights=[1.2, 1.0]  # trust logistic regression a bit more
+                    weights=[1.2, 1.0]  # Pondération favorisant la régression logistique
                 ))
             ])
         else:
